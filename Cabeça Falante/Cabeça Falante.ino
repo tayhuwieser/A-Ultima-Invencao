@@ -5,8 +5,6 @@ Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();
 
 int RC_RECEIVER_PIN1 = 14;
 
-int servoCh1 = 0;
-
 #define MIN_PULSE_WIDTH       650
 #define MAX_PULSE_WIDTH       2350
 #define DEFAULT_PULSE_WIDTH   1500
@@ -19,8 +17,8 @@ void setup() {
 }
 
 void loop() {
-  readReceiver1();
-  servo1Loop();
+  int receiver1Value = readReceiver1();
+  servo1Loop(receiver1Value);
   delay(10);
 }
 
@@ -29,16 +27,21 @@ void setupReceiver1() {
     Serial.begin(9600);
 }
 
-void readReceiver1() {
+int readReceiver1() {
+    //lê o sinal do controle (de 1020 à 1880) e converte p/ um valor de 20 à 160
     int analogValue = pulseIn(RC_RECEIVER_PIN1, HIGH, 50000);
-    servoCh1 = map(analogValue, 20, 160, 1020, 1080);
+    return map(analogValue, 1020, 1880, 20, 160);
 }
 
-void servo1Loop() {
-  pwm.setPWM(1, 0, servoCh1);
+void servo1Loop(int value1) {
+  //recebe valor do readReceiver1 e manda pro pulseWidth
+  int valor1Convertido = pulseWidth(value1);
+  // recebe valor convertido e aplica no servo
+  pwm.setPWM(1, 0, valor1Convertido);
 }
 
 int pulseWidth(int angle) {
+  // Recebe valor de 20 à 160 e transforma no valor pra uso no pwm
   int pulse_wide, analog_value;
   pulse_wide   = map(angle, 20, 160, MIN_PULSE_WIDTH, MAX_PULSE_WIDTH);
   analog_value = int(float(pulse_wide) / 1000000 * FREQUENCY * 4096);
