@@ -21,9 +21,15 @@ void setup() {
   pwm.setPWMFreq(FREQUENCY);
   setupMasterReceiver();
   setupReceivers();
+  
 }
 
 void loop() {
+  readMasterReceiver();
+  delay(10);
+}
+
+void receiverLoop(){
   int receiver1Value = readReceiver1();
   servo1Loop(receiver1Value);
 
@@ -47,6 +53,7 @@ void loop() {
   
   delay(10);
 }
+
 
 void setupMasterReceiver() {
   pinMode(RC_RECEIVER_PIN8, INPUT);
@@ -268,10 +275,10 @@ int readMasterReceiver() {
     Serial.println(analogValue);
     if (analogValue == 0)
     {
-      return 
+      receiverLoop();
     }
     else
     {
-      return 
+      delay(10);
     } 
 }
