@@ -14,46 +14,69 @@ int m3currentDirection = RELEASE;
 //the following are all ~PWM caspable ports
 int RC_RECEIVER_PIN1 = 14;
 int RC_RECEIVER_PIN3 = 15;
+int RC_RECEIVER_PIN4 = 16;
 
 void setup()
 {
-    setupReceiver1();
-    setupReceiver3();
+    setupReceivers();
     setupMotorS();
 }
 
 
 void loop()
 {
+    
     readReceiver1();
     readReceiver3();
-    motor1Loop(m1currentDirection, m1currentSpeed);
-    motor3Loop(m3currentDirection, m3currentSpeed);
+    bool isEnabled = readIsEnableSwitch();
+    motor1Loop(isEnabled, m1currentDirection, m1currentSpeed);
+    motor3Loop(isEnabled, m3currentDirection, m3currentSpeed);
     printValues();
     delay(10);
     
 }
 
-void setupReceiver1() {
+bool readIsEnableSwitch() {
+  int analogValue = pulseIn(RC_RECEIVER_PIN4, HIGH, 50000);
+  if (analogValue < 1500) {
+    return false;
+  } else {
+    return true;
+  }
+}
+
+void setupReceivers() {
     pinMode(RC_RECEIVER_PIN1, INPUT);
-    Serial.begin(9600);
-}
-void setupReceiver3() {
     pinMode(RC_RECEIVER_PIN3, INPUT);
+    pinMode(RC_RECEIVER_PIN4, INPUT);
     Serial.begin(9600);
 }
+
 void setupMotorS() {
     motorShield.begin(1000);
 }
 
-void motor1Loop(int motor1direction, int motor1speed) {
-  motor1->run(motor1direction);
-  motor1->setSpeed(motor1speed);
+void motor1Loop(bool isEnabled, int motor1direction, int motor1speed) {
+  if (isEnabled == false) {
+    motor1->run(0);
+    motor1->setSpeed(0);
+  }
+  else
+  {
+    motor1->run(motor1direction);
+    motor1->setSpeed(motor1speed);
 }
-
-void motor3Loop(int motor3direction, int motor3speed) {
-  motor3->run(motor3direction);
-  motor3->setSpeed(motor3speed);
+}
+void motor3Loop(bool isEnabled, int motor3direction, int motor3speed) {
+  if (isEnabled == false) {
+    motor3->run(0);
+    motor3->setSpeed(0);
+  }
+  else
+  {
+    motor3->run(motor3direction);
+    motor3->setSpeed(motor3speed);
+  }
 }
 
 void readReceiver1() {
